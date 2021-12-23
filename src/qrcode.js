@@ -71,7 +71,30 @@ class QRData { //In the future use typescript interfaces
         return view
     }
     #setBitmap() {
+    var middle = qrcode.getMiddleBrightnessPerArea(grayScale);
+    var sqrtNumArea = middle.length;
+    var areaWidth = Math.floor(qrcode.width / sqrtNumArea);
+    var areaHeight = Math.floor(qrcode.height / sqrtNumArea);
 
+    var buff = new ArrayBuffer(qrcode.width*qrcode.height);
+    var bitmap = new Uint8Array(buff);
+
+    //var bitmap = new Array(qrcode.height*qrcode.width);
+    
+    for (var ay = 0; ay < sqrtNumArea; ay++)
+    {
+        for (var ax = 0; ax < sqrtNumArea; ax++)
+        {
+            for (var dy = 0; dy < areaHeight; dy++)
+            {
+                for (var dx = 0; dx < areaWidth; dx++)
+                {
+                    bitmap[areaWidth * ax + dx+ (areaHeight * ay + dy)*qrcode.width] = (grayScale[areaWidth * ax + dx+ (areaHeight * ay + dy)*qrcode.width] < middle[ax][ay])?true:false;
+                }
+            }
+        }
+    }
+    return bitmap;
     }
 }
 
