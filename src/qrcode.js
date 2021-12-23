@@ -52,7 +52,7 @@ class QRData { //In the future use typescript interfaces
     return p;
     }
     grayscalePixel(x, y) {
-        let {r, g, b, a} = this.getPixel(x, y)
+        let {r, g, b} = this.getPixel(x, y)
         r = r*33
         g = g*34
         b = b*33
