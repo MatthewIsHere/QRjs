@@ -27,6 +27,19 @@ qrcode.sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 1
 
 qrcode.callback = null;
 
+
+class QRDecoder {
+    width = 0
+    height = 0
+    qrCodeSymbol = null
+    debug
+    maxImageSize = 1024*1024
+    sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 13, 16, 12 ] ]
+    constructor(debug) {
+        this.debug = debug
+    }
+}
+
 qrcode.vidSuccess = function (stream) 
 {
     qrcode.localstream = stream;
