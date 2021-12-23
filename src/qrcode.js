@@ -27,16 +27,132 @@ qrcode.sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 1
 
 qrcode.callback = null;
 
+class QRData { //In the future use typescript interfaces
+    width = 0
+    height = 0
+    context = null
+    imageData = null
+    bitmap = null
+    constructor(width, height, context, imageData) {
+        this.width = width,
+        this.height = height
+        this.context = context
+        this.imageData = imageData
+    }
+    getPixel(x, y) {
+        if (x > this.width || y > this.height) throw "point out of bounds"
+        let reference = (x*4) + (y*4 * this.width) // gets index of start of pixel RGBA
+        let r = this.imageData.data[reference + 0]
+        let g = this.imageData.data[reference + 1]
+        let b = this.imageData.data[reference + 2]
+        let a = this.imageData.data[reference + 3]
+        return {r, g, b, a}
+    var point = (x * 4) + (y * qrcode.width * 4);
+    var p = (qrcode.imagedata.data[point]*33 + qrcode.imagedata.data[point + 1]*34 + qrcode.imagedata.data[point + 2]*33)/100;
+    return p;
+    }
+    grayscalePixel(x, y) {
+        let {r, g, b, a} = this.getPixel(x, y)
+        r = r*33
+        g = g*34
+        b = b*33
+        let grayscale = (r+g+b)/100
+        return grayscale
+    }
+    #grayscaleImageData() {
+        let grayscaleBuffer = new ArrayBuffer(this.width*this.height) // buffer for image with 1 byte per pixel
+        let view = new Uint8Array(grayscaleBuffer) //view of buffer as 1 byte array
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < qrcode.width; x++) {
+                let gray = this.grayscalePixel(x, y)
+                view[x + y * this.width] = gray //fills buffer with gray pixel byte at its index
+            }
+        }
+        return view
+    }
+    #setBitmap() {
+
+    }
+}
 
 class QRDecoder {
     width = 0
     height = 0
     qrCodeSymbol = null
     debug
-    maxImageSize = 1024*1024
+    static maxImageSize = 1024*1024
     sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 13, 16, 12 ] ]
     constructor(debug) {
         this.debug = debug
+    }
+
+    decodeCanvas(canvasElement) {
+        let width = canvasElement.width
+        let height = canvasElement.height
+        let context = canvasElement.getContext("2d")
+        let imageData = context.getImageData(0, 0, width, height)
+        let data = new QRData(width, height, context, imageData)
+        
+    }
+    #process(data) {
+        var start = new Date().getTime();
+
+    var image = qrcode.grayScaleToBitmap(qrcode.grayscale());
+    //var image = qrcode.binarize(128);
+    
+    if(qrcode.debug)
+    {
+        for (var y = 0; y < qrcode.height; y++)
+        {
+            for (var x = 0; x < qrcode.width; x++)
+            {
+                var point = (x * 4) + (y * qrcode.width * 4);
+                qrcode.imagedata.data[point] = image[x+y*qrcode.width]?0:0;
+                qrcode.imagedata.data[point+1] = image[x+y*qrcode.width]?0:0;
+                qrcode.imagedata.data[point+2] = image[x+y*qrcode.width]?255:0;
+            }
+        }
+        ctx.putImageData(qrcode.imagedata, 0, 0);
+    }
+    
+    //var finderPatternInfo = new FinderPatternFinder().findFinderPattern(image);
+    
+    var detector = new Detector(image);
+
+    var qRCodeMatrix = detector.detect();
+    
+    if(qrcode.debug)
+    {
+        for (var y = 0; y < qRCodeMatrix.bits.Height; y++)
+        {
+            for (var x = 0; x < qRCodeMatrix.bits.Width; x++)
+            {
+                var point = (x * 4*2) + (y*2 * qrcode.width * 4);
+                qrcode.imagedata.data[point] = qRCodeMatrix.bits.get_Renamed(x,y)?0:0;
+                qrcode.imagedata.data[point+1] = qRCodeMatrix.bits.get_Renamed(x,y)?0:0;
+                qrcode.imagedata.data[point+2] = qRCodeMatrix.bits.get_Renamed(x,y)?255:0;
+            }
+        }
+        ctx.putImageData(qrcode.imagedata, 0, 0);
+    }
+    
+    
+    var reader = Decoder.decode(qRCodeMatrix.bits);
+    var data = reader.DataByte;
+    var str="";
+    for(var i=0;i<data.length;i++)
+    {
+        for(var j=0;j<data[i].length;j++)
+            str+=String.fromCharCode(data[i][j]);
+    }
+    
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log(time);
+    
+    return qrcode.decode_utf8(str);
+    //alert("Time:" + time + " Code: "+str);
+}
     }
 }
 
