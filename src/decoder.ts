@@ -34,8 +34,8 @@ class QRCode implements QRData {
         return new QRCode(height, width, imageData)
     }
     public static fromVideo(video: HTMLVideoElement) {
-        let height = video.height
-        let width = video.width
+        let height = video.videoHeight
+        let width = video.videoWidth
         let canvas = document.createElement("canvas")
         canvas.height = height
         canvas.width = width
