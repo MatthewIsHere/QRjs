@@ -177,7 +177,6 @@ class QRDecoder {
     //alert("Time:" + time + " Code: "+str);
 }
     }
-}
 
 qrcode.vidSuccess = function (stream) 
 {
